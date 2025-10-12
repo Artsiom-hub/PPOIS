@@ -12,7 +12,7 @@ class TestMultiset(unittest.TestCase):
         m = Multiset("{a, a, c, {a, b, b}, {}, {a, {c, c}}}")
         self.assertIn("a", m)
         self.assertIn("c", m)
-        self.assertEqual(m.size(), 9)  # a,a,c + nested counts
+        self.assertEqual(m.size(), 9) 
 
     def test_add_and_remove(self):
         m = Multiset("{}")

@@ -9,7 +9,7 @@ class Multiset:
         elif isinstance(data, Multiset):
             self.elements = [elem for elem in data.elements]
 
-    # --------------------- ПАРСЕР ---------------------
+
     def _parse_multiset(self, s):
         s = s.strip()
         if not (s.startswith('{') and s.endswith('}')):
@@ -113,7 +113,7 @@ class Multiset:
 
         def generate_subsets(arr, index=0):
             if index == len(arr):
-                return [Multiset("{}")]
+                return [Multiset()]
             subsets = generate_subsets(arr, index + 1)
             current_elem = arr[index]
             new_subsets = []
@@ -133,13 +133,13 @@ class Multiset:
     def __repr__(self):
         return self.__str__()
     def __eq__(self, other):
-        """Проверка равенства множеств по содержимому."""
+
         if not isinstance(other, Multiset):
             return False
         if len(self.elements) != len(other.elements):
             return False
 
-        # Создаём копии списков для поэлементного сравнения
+
         temp_other = other.elements.copy()
 
         for elem in self.elements:
@@ -150,6 +150,6 @@ class Multiset:
         return True
 
     def __hash__(self):
-        """Хэширование запрещаем, т.к. мультимножество изменяемое."""
-        return id(self)  # можно оставить так, если будем использовать как ключ в словаре
+
+        return id(self)  
 
