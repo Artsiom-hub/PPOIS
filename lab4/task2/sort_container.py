@@ -15,11 +15,11 @@ T = TypeVar("T")
 
 class SortContainer(Generic[T]):
 
-    value_type = T
-    reference = T
-    const_reference = T
-    pointer = T
-    const_pointer = T
+    value_type = T # type: ignore
+    reference = T # type: ignore
+    const_reference = T # type: ignore
+    pointer = T # type: ignore
+    const_pointer = T # type: ignore
     size_type = int
     difference_type = int
 
