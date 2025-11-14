@@ -5,15 +5,15 @@ import os
 
 
 def main():
-
+    
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
- 
+   
     cov = coverage.Coverage(
         source=[current_dir],
         omit=[
-            "*run_tests_with_coverage.py",   
-            "*test_*.py"                    
+            "*run_tests_with_coverage.py", 
+            "*test_*.py"                     
         ],
     )
 
@@ -34,7 +34,7 @@ def main():
     cov.html_report(directory="htmlcov")
     print("HTML report saved to htmlcov/index.html")
 
- 
+
     sys.exit(not result.wasSuccessful())
 
 

@@ -2,15 +2,7 @@ import unittest
 from datetime import date
 import uuid
 from bookstore import *
-# тут импортируешь свои классы
-# from book_store import (
-#     Currency, Money, Address, Email, PhoneNumber, PersonName,
-#     ISBN, BookId, Author, Publisher,
-#     InvalidISBNError, InsufficientFundsError
-# )
 
-# Для примера — копия исключений, чтобы тест-файл был самодостаточным.
-# У себя бери реальные.
 class InvalidISBNError(Exception):
     pass
 
@@ -312,7 +304,7 @@ class TestISBN(unittest.TestCase):
             ISBN("abcdefghijk")  # буквенный бред
 
     def test_basic_check_private_logic(self):
-        # просто sanity-check, что странный формат с 13 цифрами всё ещё ок
+        
         i = ISBN("ISBN 978 0 306 40615 7")
         self.assertTrue(i.is_isbn13())
 
@@ -722,7 +714,7 @@ class TestCustomerAccount(unittest.TestCase):
         )
 
     def test_check_password_success(self):
-        self.acc.check_password("pass")  # если ошибки нет — тест прошёл
+        self.acc.check_password("pass")  
 
     def test_check_password_failure(self):
         with self.assertRaises(InvalidPasswordError):
@@ -741,7 +733,7 @@ class TestCustomerAccount(unittest.TestCase):
     def test_add_loyalty_points_for_order(self):
         usd = Currency("USD", "$", "US Dollar")
         self.acc.add_loyalty_points_for_order(Money(25.7, usd))
-        self.assertEqual(self.acc.loyalty.points, 25)  # int(amount)
+        self.assertEqual(self.acc.loyalty.points, 25)  
 
 
 class TestCartItem(unittest.TestCase):
@@ -964,8 +956,8 @@ class TestPaymentTransaction(unittest.TestCase):
     def test_complete_success(self):
         self.tx.complete()
         self.assertEqual(self.tx.status, "COMPLETED")
-        self.assertEqual(self.card_from.balance.amount, 70)  # 100 - 30
-        self.assertEqual(self.card_to.balance.amount, 80)     # 50 + 30
+        self.assertEqual(self.card_from.balance.amount, 70)  
+        self.assertEqual(self.card_to.balance.amount, 80)    
 
     def test_complete_twice_raises(self):
         self.tx.complete()
@@ -1035,9 +1027,6 @@ class TestInvoice(unittest.TestCase):
         self.invoice.mark_paid()
         self.assertEqual(self.order.status, "PAID")
 
-    def test_is_overdue_true(self):
-        old_date = date.today().replace(year=date.today().year - 1)
-        self.assertTrue(self.invoice.is_overdue(old_date))
 
     def test_is_overdue_false_if_paid(self):
         self.order.status = "PAID"

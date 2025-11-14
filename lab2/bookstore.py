@@ -7,7 +7,6 @@ import uuid
 
 
 
-# Custom Exceptions (12x)
 
 
 class BookNotFoundError(Exception):
@@ -59,7 +58,7 @@ class LoyaltyPointsError(Exception):
 
 
 
-# Value Objects & Basics
+
 
 
 @dataclass
@@ -186,7 +185,7 @@ class BookId:
 
 
 
-# Book Domain
+
 
 
 @dataclass
@@ -524,7 +523,6 @@ class ShoppingCart:
 
     def total(self) -> Money:
         if not self.items:
-            # Assume default currency USD for empty cart
             currency = Currency(code="USD", symbol="$", name="US Dollar")
             return Money(0.0, currency)
         currency = self.items[0].book.base_price.currency
@@ -536,7 +534,7 @@ class ShoppingCart:
 
 
 
-# Orders & Payments
+
 
 
 @dataclass
@@ -685,7 +683,6 @@ class DiscountCode:
 
 
 
-# Shipping & Logistics
 
 
 @dataclass
@@ -747,7 +744,7 @@ class Reservation:
 
 
 
-# Suppliers & Purchasing
+
 
 
 @dataclass
@@ -800,7 +797,7 @@ class ReturnRequest:
 
 
 
-# Reviews & Notifications
+
 
 
 @dataclass
@@ -846,7 +843,7 @@ class Notification:
 
 
 
-# Security & Auditing
+
 
 
 @dataclass
@@ -897,7 +894,7 @@ class UserSession:
 
 
 
-# Reporting & Search
+
 
 
 @dataclass
@@ -936,7 +933,7 @@ class BookSearchEngine:
 
 
 if __name__ == "__main__":
-    # Минимальный смоук-тест, чтобы не выглядеть совсем как учебный труп
+ 
     usd = Currency(code="USD", symbol="$", name="US Dollar")
     addr = Address(line1="Warehouse street 1", city="Booktown", country="DE", postal_code="12345")
     loc = WarehouseLocation(code="WH1", description="Main warehouse", address=addr)

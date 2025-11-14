@@ -114,12 +114,12 @@ class TicTacToe:
             line = " | ".join(row)
             lines.append(line)
             if i < self.size - 1:
-                lines.append("-" * (self.size * 3 - 1))
+                lines.append("-" * (self.size * 4 - 3))
         return "\n".join(lines)
 
 
 
-if True:
+if __name__ == "__main__":
     game = TicTacToe()
     
     while not game.winner:

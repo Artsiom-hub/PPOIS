@@ -8,18 +8,18 @@ def main():
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
- 
+   
     cov = coverage.Coverage(
         source=[current_dir],
         omit=[
-            "*run_tests_with_coverage.py",   
+            "*run_tests_with_coverage.py",  
             "*test_*.py"                    
         ],
     )
 
     cov.start()
 
-
+ 
     loader = unittest.TestLoader()
     tests = loader.discover(start_dir=current_dir, pattern="test_*.py")
     runner = unittest.TextTestRunner(verbosity=2)
@@ -34,7 +34,7 @@ def main():
     cov.html_report(directory="htmlcov")
     print("HTML report saved to htmlcov/index.html")
 
- 
+   
     sys.exit(not result.wasSuccessful())
 
 
