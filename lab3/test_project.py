@@ -28,9 +28,7 @@ class TestUser(unittest.TestCase):
         self.assertFalse(self.user.active)
 
 
-# ============================================================
-#                       CUSTOMER TESTS
-# ============================================================
+
 
 class TestCustomer(unittest.TestCase):
 
@@ -60,9 +58,7 @@ class TestCustomer(unittest.TestCase):
             self.customer.get_default_card()
 
 
-# ============================================================
-#                      TRAVEL AGENT TESTS
-# ============================================================
+
 
 class DummyBooking:
     def __init__(self, price):
@@ -90,9 +86,7 @@ class TestTravelAgent(unittest.TestCase):
         self.assertEqual(self.agent.calculate_commission(booking), 20.0)
 
 
-# ============================================================
-#                     BANK ACCOUNT TESTS
-# ============================================================
+
 
 class TestBankAccount(unittest.TestCase):
 
@@ -116,9 +110,7 @@ class TestBankAccount(unittest.TestCase):
             self.acc.withdraw(200)
 
 
-# ============================================================
-#                     PAYMENT CARD TESTS
-# ============================================================
+
 
 class TestPaymentCard(unittest.TestCase):
 
@@ -169,9 +161,7 @@ class TestPaymentCard(unittest.TestCase):
         self.assertEqual(self.acc.balance, 350)
 
 
-# ============================================================
-#                   PAYMENT GATEWAY TESTS
-# ============================================================
+
 
 class TestPaymentGateway(unittest.TestCase):
 
@@ -205,9 +195,7 @@ class TestPaymentGateway(unittest.TestCase):
         self.assertEqual(fetched, tx)
 
 
-# ============================================================
-#                    GEO / DESTINATION TESTS
-# ============================================================
+
 
 class TestGeo(unittest.TestCase):
 
@@ -245,9 +233,7 @@ class TestGeo(unittest.TestCase):
 
         self.assertTrue(dest.has_tag("food"))
         self.assertEqual(len(dest.tags), 2)
-# ============================================================
-#                     AIRPORT TESTS
-# ============================================================
+
 
 class TestAirport(unittest.TestCase):
 
@@ -270,9 +256,7 @@ class TestAirport(unittest.TestCase):
         self.assertEqual(desc, "Berlin Brandenburg (BER), Berlin, DE")
 
 
-# ============================================================
-#                         SEAT TESTS
-# ============================================================
+
 
 class TestSeat(unittest.TestCase):
 
@@ -294,9 +278,7 @@ class TestSeat(unittest.TestCase):
         self.assertFalse(self.seat.is_occupied)
 
 
-# ============================================================
-#                   PASSENGER PROFILE TESTS
-# ============================================================
+
 
 class TestPassengerProfile(unittest.TestCase):
 
@@ -323,9 +305,7 @@ class TestPassengerProfile(unittest.TestCase):
         self.assertEqual(self.profile.age(), expected_age)
 
 
-# ============================================================
-#                       BAGGAGE TESTS
-# ============================================================
+
 
 class TestBaggage(unittest.TestCase):
 
@@ -339,9 +319,7 @@ class TestBaggage(unittest.TestCase):
         self.assertEqual(bag.overweight_fee(limit=20, fee_per_kg=10), 50.0)
 
 
-# ============================================================
-#                         FLIGHT TESTS
-# ============================================================
+
 
 class TestFlight(unittest.TestCase):
 
@@ -390,9 +368,7 @@ class TestFlight(unittest.TestCase):
         s1.reserve()   # 1 занято, 2 свободно
 
         self.assertEqual(self.flight.available_seats_count(), 2)
-# ============================================================
-#                     ROOM TYPE TESTS
-# ============================================================
+
 
 class TestRoomType(unittest.TestCase):
 
@@ -411,9 +387,7 @@ class TestRoomType(unittest.TestCase):
             self.rt.price_for_guests(3)
 
 
-# ============================================================
-#                       ROOM TESTS
-# ============================================================
+
 
 class TestRoom(unittest.TestCase):
 
@@ -436,9 +410,7 @@ class TestRoom(unittest.TestCase):
         self.assertFalse(self.room.occupied)
 
 
-# ============================================================
-#                       HOTEL TESTS
-# ============================================================
+
 
 class TestHotel(unittest.TestCase):
 
@@ -449,9 +421,7 @@ class TestHotel(unittest.TestCase):
 
         self.rt_std = RoomType("STD", "Standard", 2, 100)
         self.rt_del_
-# ============================================================
-#                  LOYALTY ACCOUNT TESTS
-# ============================================================
+
 
 class TestLoyaltyAccount(unittest.TestCase):
 
@@ -488,9 +458,7 @@ class TestLoyaltyAccount(unittest.TestCase):
             self.acc.redeem_points(100)
 
 
-# ============================================================
-#                        COUPON TESTS
-# ============================================================
+
 
 class TestCoupon(unittest.TestCase):
 
@@ -515,9 +483,7 @@ class TestCoupon(unittest.TestCase):
             c.apply(200)
 
 
-# ============================================================
-#                       DISCOUNT TESTS
-# ============================================================
+
 
 class TestDiscount(unittest.TestCase):
 
@@ -531,9 +497,7 @@ class TestDiscount(unittest.TestCase):
         self.assertEqual(self.disc.apply_if_applicable(299), 299)
 
 
-# ============================================================
-#                        CART ITEM TESTS
-# ============================================================
+
 
 class TestCartItem(unittest.TestCase):
 
@@ -548,9 +512,6 @@ class TestCartItem(unittest.TestCase):
         self.assertEqual(item.quantity, 4)
 
 
-# ============================================================
-#                           CART TESTS
-# ============================================================
 
 class TestCart(unittest.TestCase):
 
@@ -572,9 +533,7 @@ class TestCart(unittest.TestCase):
         self.cart.add_item(CartItem("X", None, 10))
         self.cart.clear()
         self.assertEqual(len(self.cart.items), 0)
-# ============================================================
-#                     SEARCH CRITERIA TESTS
-# ============================================================
+
 
 class TestSearchCriteria(unittest.TestCase):
 
@@ -604,9 +563,7 @@ class TestSearchCriteria(unittest.TestCase):
             sc.validate()
 
 
-# ============================================================
-#                RECOMMENDATION ENGINE TESTS
-# ============================================================
+
 
 class TestRecommendationEngine(unittest.TestCase):
 
@@ -653,9 +610,7 @@ class TestRecommendationEngine(unittest.TestCase):
         self.assertEqual(result[0], self.dest_tokyo)
 
 
-# ============================================================
-#                      NOTIFICATION TESTS
-# ============================================================
+
 
 class TestNotification(unittest.TestCase):
 
@@ -673,9 +628,7 @@ class TestNotification(unittest.TestCase):
         self.assertEqual(n2.short(), text[:40])
 
 
-# ============================================================
-#                 EMAIL NOTIFICATION TESTS
-# ============================================================
+
 
 class TestEmailNotification(unittest.TestCase):
 
@@ -696,9 +649,7 @@ class TestEmailNotification(unittest.TestCase):
         self.assertIn("Booking confirmed", formatted)
 
 
-# ============================================================
-#                  SMS NOTIFICATION TESTS
-# ============================================================
+
 
 class TestSMSNotification(unittest.TestCase):
 
@@ -714,9 +665,7 @@ class TestSMSNotification(unittest.TestCase):
     def test_format_sms(self):
         txt = self.sms.format_sms()
         self.assertEqual(txt, "SMS to +4912345678: Your code is 1234")
-# ============================================================
-#                     CHAT MESSAGE TESTS
-# ============================================================
+
 
 class TestChatMessage(unittest.TestCase):
 
@@ -735,9 +684,7 @@ class TestChatMessage(unittest.TestCase):
         )
 
 
-# ============================================================
-#                     SUPPORT TICKET TESTS
-# ============================================================
+
 
 class TestSupportTicket(unittest.TestCase):
 
@@ -759,9 +706,7 @@ class TestSupportTicket(unittest.TestCase):
         self.assertEqual(self.ticket.status, "CLOSED")
 
 
-# ============================================================
-#                           SESSION TESTS
-# ============================================================
+
 
 class TestSession(unittest.TestCase):
 
@@ -778,9 +723,7 @@ class TestSession(unittest.TestCase):
         self.assertEqual(self.session.expires_at, old_exp + datetime.timedelta(hours=3))
 
 
-# ============================================================
-#                  AUTHENTICATION SERVICE TESTS
-# ============================================================
+
 
 class TestAuthenticationService(unittest.TestCase):
 

@@ -6,9 +6,6 @@ import datetime
 import hashlib
 
 
-# ===========================
-#      CUSTOM EXCEPTIONS
-# ===========================
 
 class TravelError(Exception):
     """Base exception for travel system."""
@@ -77,9 +74,7 @@ class UnauthorizedActionError(TravelError):
         super().__init__(message, code="UNAUTHORIZED")
 
 
-# ===========================
-#        CORE ENTITIES
-# ===========================
+
 
 @dataclass
 class User:
@@ -212,9 +207,7 @@ class PaymentGateway:
         return self.transactions[tx_id]
 
 
-# ===========================
-#      GEO / DESTINATION
-# ===========================
+
 
 @dataclass
 class Country:
@@ -273,9 +266,7 @@ class Airport:
         return f"{self.name} ({self.code}), {self.city.name}, {self.city.country.code}"
 
 
-# ===========================
-#        FLIGHT DOMAIN
-# ===========================
+
 
 @dataclass
 class Seat:
@@ -347,9 +338,7 @@ class Flight:
         return sum(1 for s in self.seats.values() if not s.is_occupied)
 
 
-# ===========================
-#        HOTEL DOMAIN
-# ===========================
+
 
 @dataclass
 class RoomType:
@@ -398,13 +387,11 @@ class Hotel:
         return None
 
     def update_rating(self, new_rating: float) -> None:
-        # примитивное обновление рейтинга
+
         self.rating = (self.rating + new_rating) / 2 if self.rating else new_rating
 
 
-# ===========================
-#        BOOKINGS
-# ===========================
+
 
 @dataclass
 class Booking:
@@ -412,7 +399,7 @@ class Booking:
     customer: Customer
     created_at: datetime.datetime
     total_price: float
-    status: str = "PENDING"  # PENDING, CONFIRMED, CANCELLED
+    status: str = "PENDING" 
     notes: str = ""
 
     def confirm(self) -> None:
@@ -489,14 +476,12 @@ class Itinerary:
         return sum(b.total_price for b in self.flight_bookings + self.hotel_bookings)
 
 
-# ===========================
-#    LOYALTY / DISCOUNTS
-# ===========================
+
 
 @dataclass
 class LoyaltyProgram:
     name: str
-    levels: Dict[str, int] = field(default_factory=dict)  # level -> required points
+    levels: Dict[str, int] = field(default_factory=dict) 
     base_multiplier: float = 1.0
 
     def add_level(self, level_name: str, required_points: int) -> None:
@@ -551,13 +536,11 @@ class Discount:
         return total
 
 
-# ===========================
-#      CART / SEARCH / REC
-# ===========================
+
 
 @dataclass
 class CartItem:
-    item_type: str  # FLIGHT, HOTEL, PACKAGE
+    item_type: str  
     reference: object
     price: float
     quantity: int = 1
@@ -599,7 +582,7 @@ class SearchCriteria:
 
 
 class RecommendationEngine:
-    """Тупой, но честный рекомендатор."""
+
 
     def __init__(self):
         self.history: Dict[str, List[Destination]] = {}
@@ -608,7 +591,7 @@ class RecommendationEngine:
         self.history.setdefault(customer.user_id, []).append(destination)
 
     def recommend(self, customer: Customer, all_destinations: List[Destination]) -> List[Destination]:
-        """Пример поведения: простейшая рекомендация по тегам."""
+ 
         seen = self.history.get(customer.user_id, [])
         seen_tags = {t for d in seen for t in d.tags}
         scored = []
@@ -619,9 +602,7 @@ class RecommendationEngine:
         return [d for score, d in scored if score > 0]
 
 
-# ===========================
-#       NOTIFICATIONS
-# ===========================
+
 
 @dataclass
 class Notification:
@@ -655,9 +636,7 @@ class SMSNotification(Notification):
         return f"SMS to {self.phone_number}: {self.message}"
 
 
-# ===========================
-#     SUPPORT / CHAT
-# ===========================
+
 
 @dataclass
 class ChatMessage:
@@ -685,9 +664,7 @@ class SupportTicket:
         self.status = "CLOSED"
 
 
-# ===========================
-#    AUTH / SESSION STUFF
-# ===========================
+
 
 @dataclass
 class Session:
@@ -728,9 +705,7 @@ class AuthenticationService:
         return session
 
 
-# ===========================
-#       DEMO / USAGE
-# ===========================
+
 
 def demo() -> None:
     # --- Users, auth, cards ---
