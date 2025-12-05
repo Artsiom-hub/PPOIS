@@ -16,6 +16,7 @@ people = [
     Person("Carl", 25)
 ]
 
+print(people)
 sorted_people = binary_tree_sort(people)
 sorted_people_M = msd_radix_sort(people)
 print("BST:", sorted_people)
@@ -23,5 +24,6 @@ print("MSD:", sorted_people)
 
 
 s = ["zeta", "alpha", "beta", "ab", "aba"]
+print(s)
 print("BST:", binary_tree_sort(s))
 print("MSD:",msd_radix_sort(s))
