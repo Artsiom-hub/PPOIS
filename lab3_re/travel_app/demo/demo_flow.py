@@ -5,7 +5,6 @@ import sys
 # Добавляем путь к корню проекта
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import datetime
 import uuid
 
 from core.users.auth import AuthenticationService
@@ -34,6 +33,9 @@ from core.loyalty.account import LoyaltyAccount
 from core.discounts.coupons import Coupon
 from core.payments.models import BankAccount, PaymentCard
 from core.payments.gateway import PaymentGateway
+from datetime import datetime, UTC, timedelta, date
+
+
 
 
 # -----------------------------------------------------
@@ -166,8 +168,8 @@ def create_flight():
     dest_idx   = safe_index("Куда (номер): ", len(airports))
 
 
-    dep = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=1)
-    arr = dep + datetime.timedelta(hours=3)
+    dep = datetime.now(UTC) + timedelta(days=1)
+    arr = dep + timedelta(hours=3)
 
 
     flight = Flight(
@@ -276,13 +278,13 @@ def make_flight_booking(user):
         customer=user,
         passport_number=input("Паспорт: "),
         nationality="???",
-        date_of_birth=datetime.date(1990, 1, 1),
+        date_of_birth=date(1990, 1, 1),
     )
 
     booking = FlightBooking(
         booking_id=str(uuid.uuid4()),
         customer=user,
-        created_at=datetime.datetime.utcnow(),
+        created_at = datetime.now(UTC),
         total_price=flight.base_price,
         flight=flight,
         passenger=passenger,
@@ -303,16 +305,17 @@ def make_hotel_booking(user):
     hotel = hotels[idx]
 
     room = hotel.rooms[0]
-    today = datetime.date.today()
+    today = date.today()
     booking = HotelBooking(
         booking_id=str(uuid.uuid4()),
         customer=user,
-        created_at=datetime.datetime.utcnow(),
+        created_at=datetime.now(UTC),
         total_price=room.price_per_night,
         hotel=hotel,
         room=room,
-        check_in=today + datetime.timedelta(days=1),
-        check_out=today + datetime.timedelta(days=3),
+        check_in = today + timedelta(days=1),
+        check_out = today + timedelta(days=3),
+
     )
     print("Бронирование создано:", booking.total_price)
     return booking
@@ -322,32 +325,18 @@ def make_hotel_booking(user):
 # 6. Корзина
 # -----------------------------------------------------
 
-def open_cart(user):
+def get_user_cart(user):
+    """Гарантированно возвращает корзину пользователя."""
     global cart, carts
-
-    # если корзина существует — просто используем её
-    if user.email in carts:
-        cart = carts[user.email]
-        print("Корзина уже существует.")
-    else:
-        cart = Cart(user)
-        carts[user.email] = cart
-        print("Корзина создана!")
-
-
-
-def add_to_cart(user, item_type, booking):
-    global cart, carts
-
-    # carts — словарь вида {email: Cart}
-    # cart — объект текущей корзины
 
     if user.email not in carts:
-        print("Корзина не была открыта — создаю новую автоматически.")
-        cart = Cart(user)
-        carts[user.email] = cart
-    else:
-        cart = carts[user.email]
+        carts[user.email] = Cart(user)
+
+    cart = carts[user.email]
+    return cart
+
+def add_to_cart(user, item_type, booking):
+    cart = get_user_cart(user)
 
     cart.add_item(
         CartItem(
@@ -358,19 +347,46 @@ def add_to_cart(user, item_type, booking):
     )
 
     print("Добавлено в корзину!")
+def show_cart(user):
+    cart = get_user_cart(user)
 
-
-
-
-def view_cart():
-    if not cart:
-        print("Корзина не создана!")
-        return
     print("\n=== Корзина ===")
-    for item in cart.items:
-        print("-", item.item_type, item.price)
-    print("Итого:", cart.total())
+    if not cart.items:
+        print("Корзина пуста.")
+        print()
+        return
 
+    for idx, item in enumerate(cart.items):
+        print(f"{idx}. {item.item_type}: {item.reference} — {item.price}")
+
+    print(f"ИТОГО: {cart.total()}")
+    print()
+def clear_cart(user):
+    cart = get_user_cart(user)
+    cart.items.clear()
+    print("Корзина очищена!\n")
+def cart_menu(user):
+    while True:
+        print("\n--- Корзина ---")
+        print("1. Показать корзину")
+        print("2. Очистить корзину")
+        print("0. Назад")
+
+        choice = input("> ").strip()
+
+        if choice == "1":
+            show_cart(user)
+            input("ENTER для продолжения...")
+
+        elif choice == "2":
+            clear_cart(user)
+            input("ENTER для продолжения...")
+
+        elif choice == "0":
+            return
+
+        else:
+            print("Неверный ввод.")
 
 # -----------------------------------------------------
 # 7. Оплата
@@ -395,19 +411,40 @@ def setup_payment(user):
 
 
 def pay():
-    if not cart:
+    global cart, carts
+
+    # Нет корзины вообще
+    if cart is None:
         print("Нет корзины!")
         return
 
-    amount = cart.total()
+    # Корзина есть, но пуста
+    if not cart.items:
+        print("Корзина пуста — нечего оплачивать.")
+        return
+
     user = cart.customer
+    amount = cart.total()
     card = user.get_default_card()
 
+    if card is None:
+        print("У пользователя нет платёжной карты!")
+        return
+
     try:
+        # Совершаем оплату
         payment_gateway.transfer(card, card, amount)
         print("Оплата успешно проведена!")
+
+        # Очищаем корзину
+        cart.items.clear()
+        carts[user.email] = cart  # сохраняем пустую корзину
+
+        print("Корзина очищена после оплаты!")
+
     except Exception as e:
-        print("Ошибка:", e)
+        print("Ошибка при оплате:", e)
+
 
 
 # -----------------------------------------------------
@@ -478,22 +515,21 @@ def main_menu(user):
             print("1. Рейс")
             print("2. Отель")
             sub = input("> ")
+
             if sub == "1":
                 b = make_flight_booking(user)
                 if b:
                     add_to_cart(user, "FLIGHT", b)
 
-            if sub == "2":
+            elif sub == "2":
                 b = make_hotel_booking(user)
-                if b: add_to_cart("HOTEL", b)
+                if b:
+                    add_to_cart(user, "HOTEL", b)
+
 
         elif choice == "5":
-            print("\n--- Корзина ---")
-            print("1. Открыть корзину")
-            print("2. Показать корзину")
-            sub = input("> ")
-            if sub == "1": open_cart(user)
-            if sub == "2": view_cart()
+            cart_menu(user)
+
 
         elif choice == "6":
             print("\n--- Оплата ---")
