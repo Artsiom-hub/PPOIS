@@ -1,8 +1,10 @@
 # demo_main.py
 # Консольная демонстрация проекта "Книжный склад"
-
+from Core_Domains.Order_Processing.exceptions import OrderNotFound
 from Core_Domains.book_catalog.models import Book
+from Core_Domains.book_catalog.exceptions import BookNotFound
 from Core_Domains.book_catalog.value_objects import Price
+from Core_Domains.User_Security.exceptions import EmailAlreadyExists, WrongPassword, InvalidCredentials
 
 from Core_Domains.Order_Processing.models import Order
 
@@ -10,7 +12,9 @@ from Core_Domains.Warehouse.models import Cell, StockItem
 from Core_Domains.Warehouse.value_objects import Quantity
 
 from Core_Domains.User_Security.models import User
+from Infrastructure.Persistence_Layer.in_memory.book_repo import InMemoryBookRepository
 
+book_repo = InMemoryBookRepository()
 # === Используем зависимости из DI ===
 from Infrastructure.api.dependencies import (
     get_book_service,
@@ -95,11 +99,43 @@ def create_order():
 
 def add_book_to_order():
     print("\n=== Добавить книгу в заказ ===")
-    order_id = int(input("ID заказа: "))
-    book_id = int(input("ID книги: "))
-    qty = int(input("Количество: "))
-    order_service.add_book(order_id, book_id, qty)
-    print("Добавлено.")
+
+    while True:
+        try:
+            order_id = int(input("ID заказа: "))
+            book_id = int(input("ID книги: "))
+            qty = int(input("Количество: "))
+
+            try:
+                order_service.add_book(order_id, book_id, qty)
+                print("Добавлено.")
+                return
+
+            except OrderNotFound:
+                print(f"❌ Заказ с ID {order_id} не найден.")
+                retry = input("Попробовать снова? (y/n): ").lower()
+                if retry != "y":
+                    return
+                continue
+
+            except BookNotFound:
+                print(f"❌ Книга с ID {book_id} не найдена.")
+                retry = input("Попробовать снова? (y/n): ").lower()
+                if retry != "y":
+                    return
+                continue
+
+            except KeyError:
+                # на случай, если репо выбросит KeyError напрямую
+                print(f"❌ Книга с ID {book_id} отсутствует в каталоге.")
+                retry = input("Попробовать снова? (y/n): ").lower()
+                if retry != "y":
+                    return
+                continue
+
+        except ValueError:
+            print("❌ Ошибка ввода. Введите числа.")
+            continue
 
 
 def pay_order():
@@ -111,18 +147,57 @@ def pay_order():
 
 def register_user():
     print("\n=== Регистрация ===")
-    email = input("Email: ")
-    pwd = input("Пароль: ")
-    user = user_service.register(email, pwd)
-    print(f"Пользователь создан. ID = {user.id}")
+
+    while True:
+        email = input("Email: ").strip()
+        pwd = input("Пароль: ").strip()
+
+        try:
+            user = user_service.register(email, pwd)
+            print(f"Пользователь создан. ID = {user.id}")
+            return
+
+
+        except EmailAlreadyExists:
+            print(f"Email '{email}' уже зарегистрирован.")
+            retry = input("Попробовать снова? (y/n): ").lower()
+            if retry != "y":
+                return
+            continue
+
+        except WrongPassword:
+            print("Пароль не соответствует требованиям.")
+            retry = input("Попробовать снова? (y/n): ").lower()
+            if retry != "y":
+                return
+            continue
+
+        except Exception as ex:
+            print(f"Неизвестная ошибка: {ex}")
+            retry = input("Попробовать снова? (y/n): ").lower()
+            if retry != "y":
+                return
+            continue
 
 
 def login_user():
     print("\n=== Логин ===")
-    email = input("Email: ")
-    pwd = input("Пароль: ")
-    user = auth_service.authenticate(email, pwd)
-    print(f"Вход выполнен. ID пользователя = {user.id}")
+    email = input("Email: ").strip()
+    pwd = input("Пароль: ").strip()
+
+    try:
+        user = auth_service.authenticate(email, pwd)
+        print(f"Успешный вход! Добро пожаловать, {user.email}.")
+    except InvalidCredentials:
+        print("Неверный email или пароль.")
+        retry = input("Попробовать снова? (y/n): ").strip().lower()
+        if retry == "y":
+            return login_user()
+        else:
+            return
+    except Exception as e:
+        print(f"Неизвестная ошибка: {e}")
+
 
 
 def inbound():
@@ -177,17 +252,51 @@ def show_all_cells():
     print("\n=== Ячейки склада ===")
     for cell in warehouse_service.list_cells():
         print(f"{cell.id}: {cell.code} (capacity={cell.capacity})")
-
 def show_user_cart():
     print("\n=== Корзина пользователя ===")
-    uid = int(input("ID пользователя: "))
-    cart = order_service.get_user_cart(uid)
-    if not cart:
-        print("Корзина пустая.")
+    try:
+        user_id = int(input("ID пользователя: "))
+    except:
+        print("Неверный ввод.")
         return
-    print(f"Корзина (Order id={cart.id}):")
-    for item in cart.items:
-        print(f"- book_id={item.book_id}, qty={item.quantity}")
+
+    # 1️⃣ Получаем корзину как есть (старый/новый)
+    order = order_service.order_repo.find_open_cart(user_id)
+    if not order:
+        print("Корзина пуста.")
+        return
+
+    # 2️⃣ Аккуратно вычисляем ID заказа
+    order_id = getattr(order, "order_id", getattr(order, "id", None))
+    print(f"Корзина (Order id={order_id}):")
+
+    # 3️⃣ Для безопасности — пробуем получить книгу по item.book или item.book_id
+    for item in getattr(order, "items", []):
+        # сначала пробуем item.book → Book
+        book = getattr(item, "book", None)
+
+        # если книга не указана напрямую, пробуем вытащить id
+        if book is None:
+            # item.book_id в одних моделях, item.id_book — в других
+            book_id = getattr(item, "book_id", getattr(item, "id_book", None))
+            if book_id is not None:
+                book = book_service.book_repo.get(book_id)
+        else:
+            # если объект есть — пробуем взять его id
+            book_id = getattr(book, "book_id", getattr(book, "id", None))
+
+        # если после всех попыток книга не найдена
+        if not book:
+            book_title = "Неизвестная книга"
+            book_id = None
+        else:
+            book_title = getattr(book, "title", "???")
+            book_id = getattr(book, "book_id", getattr(book, "id", None))
+
+        print(f"- {book_title} (book_id={book_id}), qty={item.quantity}")
+
+
+
 
 # ------------------------------------------------------
 #                   MAIN LOOP
